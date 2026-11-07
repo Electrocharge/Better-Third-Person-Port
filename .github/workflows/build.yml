@@ -18,7 +18,7 @@ jobs:
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     permissions:
-      contents: write
+      contents: read
 
     steps:
       - name: Checkout
@@ -93,41 +93,24 @@ jobs:
           set -o pipefail
           xmake -y -v 2>&1 | tee /tmp/build.log
 
-      - name: Publish build log
-        if: always()
-        run: |
-          git config user.name ci; git config user.email ci@users.noreply.github.com
-          git checkout --orphan ci-log; git rm -rf --quiet . || true
-          tail -n 250 /tmp/build.log > build.log 2>/dev/null || echo 'no build log' > build.log
-          git add build.log; git commit -q -m 'ci log'; git push -f origin ci-log
-          git checkout -f ${{ github.sha }}
-
       - name: Package .levipack
         id: locate
         run: bash scripts/package_levipack.sh "$MOD_NAME" build
 
-      - name: Show release files
+      - name: Show packaged build files
         run: |
           echo "Build number: ${{ github.run_number }}"
           echo "SHA: ${{ github.sha }}"
-          echo "Release files:"
+          echo "Build outputs:"
           ls -lh "${{ steps.locate.outputs.so_file }}"
           ls -lh "${{ steps.locate.outputs.pack_file }}"
 
-      - name: Create GitHub Release
-        uses: softprops/action-gh-release@v2
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
         with:
-          tag_name: build-${{ github.run_number }}
-          name: ${{ env.MOD_NAME }} Build #${{ github.run_number }}
-          body: |
-            Automated build release.
-
-            Build Number: ${{ github.run_number }}
-            Commit: ${{ github.sha }}
-            Ref: ${{ github.ref_name }}
-          generate_release_notes: true
-          files: |
+          name: BetterThirdPerson-${{ github.run_number }}
+          path: |
             ${{ steps.locate.outputs.so_file }}
             ${{ steps.locate.outputs.pack_file }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          if-no-files-found: error
+          retention-days: 30

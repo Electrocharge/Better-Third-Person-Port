@@ -1,0 +1,11 @@
+{
+  "type": "preload-native",
+  "name": "BetterThirdPerson",
+  "description": "Bedrock port of the Java 'Better Third Person' idea: the camera orbits freely and your character turns to face the direction you are moving. Derived from FreeLook by NexCaise (unofficial).",
+  "author": "Electrocharge (derived from FreeLook by NexCaise)",
+  "version": "1.0.0",
+  "entry": "libBetterThirdPerson.so",
+  "minecraft_versions": [],
+  "overwrite_files": [],
+  "overwrite_folders": []
+}

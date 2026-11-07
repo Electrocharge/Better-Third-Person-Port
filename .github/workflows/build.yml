@@ -1,0 +1,133 @@
+name: Build & Release
+
+on:
+  push:
+    branches: [main]
+    tags: ["v*.*.*"]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+env:
+  MOD_NAME: BetterThirdPerson
+  NDK_VERSION: r29
+
+jobs:
+  build:
+    name: Build & Release (android-arm64-v8a)
+    if: github.event_name != 'pull_request'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup xmake
+        uses: xmake-io/github-action-setup-xmake@v1
+        with:
+          xmake-version: latest
+
+      - name: Setup Android NDK
+        id: setup-ndk
+        uses: nttld/setup-ndk@v1
+        with:
+          ndk-version: ${{ env.NDK_VERSION }}
+
+      - name: Cache xmake dependencies
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.xmake
+            .xmake
+          key: xmake-${{ runner.os }}-${{ hashFiles('xmake.lua') }}
+          restore-keys: |
+            xmake-${{ runner.os }}-
+
+      - name: Ensure build tools are available
+        run: |
+          if ! command -v cmake >/dev/null 2>&1 || ! command -v ninja >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y cmake ninja-build
+          fi
+
+      - name: Setup matching LLVM (host clang used by xmake)
+        run: |
+          NDK="${{ steps.setup-ndk.outputs.ndk-path }}"
+          CLANG="${NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++"
+          LLVM_MAJOR="$("${CLANG}" --version | sed -n 's/.*clang version \([0-9][0-9]*\).*/\1/p' | head -n 1)"
+
+          if [[ -z "${LLVM_MAJOR}" ]]; then
+            echo "Unable to determine NDK LLVM major version." >&2
+            exit 1
+          fi
+
+          echo "NDK Clang major: ${LLVM_MAJOR}"
+          wget -qO llvm.sh https://apt.llvm.org/llvm.sh
+          chmod +x llvm.sh
+          sudo ./llvm.sh "${LLVM_MAJOR}" all
+
+      - name: Ensure zip is available
+        run: |
+          if ! command -v zip >/dev/null 2>&1; then
+            sudo apt-get update
+            sudo apt-get install -y zip
+          fi
+
+      - name: Configure
+        run: |
+          LLVM_MAJOR="$("${{ steps.setup-ndk.outputs.ndk-path }}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++" --version | sed -n 's/.*clang version \([0-9][0-9]*\).*/\1/p' | head -n 1)"
+          NDK="${{ steps.setup-ndk.outputs.ndk-path }}"
+          NDK_CLANGXX="${NDK}/toolchains/llvm/prebuilt/linux-x86_64/bin/clang++"
+
+          xmake f -y -p android -a arm64-v8a -m release \
+            --ndk="${NDK}" \
+            --cc="clang-${LLVM_MAJOR}" \
+            --cxx="clang++-${LLVM_MAJOR}" \
+            --ld="${NDK_CLANGXX}" \
+            --sh="${NDK_CLANGXX}"
+
+      - name: Build
+        run: |
+          set -o pipefail
+          xmake -y -v 2>&1 | tee /tmp/build.log
+
+      - name: Publish build log
+        if: always()
+        run: |
+          git config user.name ci; git config user.email ci@users.noreply.github.com
+          git checkout --orphan ci-log; git rm -rf --quiet . || true
+          tail -n 250 /tmp/build.log > build.log 2>/dev/null || echo 'no build log' > build.log
+          git add build.log; git commit -q -m 'ci log'; git push -f origin ci-log
+          git checkout -f ${{ github.sha }}
+
+      - name: Package .levipack
+        id: locate
+        run: bash scripts/package_levipack.sh "$MOD_NAME" build
+
+      - name: Show release files
+        run: |
+          echo "Build number: ${{ github.run_number }}"
+          echo "SHA: ${{ github.sha }}"
+          echo "Release files:"
+          ls -lh "${{ steps.locate.outputs.so_file }}"
+          ls -lh "${{ steps.locate.outputs.pack_file }}"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: build-${{ github.run_number }}
+          name: ${{ env.MOD_NAME }} Build #${{ github.run_number }}
+          body: |
+            Automated build release.
+
+            Build Number: ${{ github.run_number }}
+            Commit: ${{ github.sha }}
+            Ref: ${{ github.ref_name }}
+          generate_release_notes: true
+          files: |
+            ${{ steps.locate.outputs.so_file }}
+            ${{ steps.locate.outputs.pack_file }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

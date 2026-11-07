@@ -1,0 +1,452 @@
+CUSTOM PROPRIETARY / SOURCE-AVAILABLE LICENSE (CPNC) v1.0
+
+SPDX-License-Identifier: LicenseRef-CPNC-1.0
+
+Copyright (c) 2026 NexCaise
+All Rights Reserved.
+
+---
+
+1. DEFINITIONS / DEFINISI
+
+[EN]
+
+"Work" means any software, source code, mod, plugin, addon, asset, document, artwork, configuration, or other material distributed by the Author under this License.
+
+"Original Work" means the Work as originally created and distributed by the Author, including its original source code, assets, documentation, and other materials.
+
+"Derivative Work" means a modified, adapted, translated, extended, combined, or otherwise altered version of the Original Work that incorporates or is based upon the Original Work.
+
+"Author" means the original creator or copyright holder of the Work. For this License, the Author is NexCaise, unless otherwise stated in the applicable Work.
+
+"Owner" means the Author or another person or entity that lawfully owns the applicable copyright or distribution rights in the Work and is authorized to impose distribution restrictions under this License.
+
+"User" means an individual who receives, accesses, uses, modifies, or distributes the Work under this License.
+
+"Personal Use" means use by an individual for their own private, non-commercial purposes. Personal Use does not include use by a company, organization, business, or other commercial entity.
+
+"Commercial Use" means any use of the Work or a Derivative Work for the purpose of obtaining commercial revenue or providing a commercial product or service, including but not limited to selling software, incorporating the Work into paid software, or using the Work to create a commercial product.
+
+"Restricted Distribution" means a distribution of the Work or a particular copy of the Work made by the Author or Owner through a designated or controlled distribution method, including but not limited to a private or restricted link, special download link, invitation-only website, private repository, authenticated server, private channel, direct transfer, or another specific distribution method designated by the Author or Owner as restricted.
+
+"Authorized Distribution Channel" means a website, repository, server, link, channel, storage location, or other distribution method expressly designated by the Author or Owner for distribution of the applicable Work.
+
+[ID]
+
+"Karya" berarti perangkat lunak, kode sumber, mod, plugin, addon, aset, dokumen, karya seni, konfigurasi, atau materi lainnya yang didistribusikan oleh Pembuat berdasarkan Lisensi ini.
+
+"Karya Asli" berarti Karya sebagaimana awalnya dibuat dan didistribusikan oleh Pembuat, termasuk kode sumber, aset, dokumentasi, dan materi asli lainnya.
+
+"Karya Turunan" berarti versi dari Karya Asli yang telah dimodifikasi, diadaptasi, diterjemahkan, diperluas, digabungkan, atau diubah dengan cara lain yang memasukkan atau didasarkan pada Karya Asli.
+
+"Pembuat" berarti pencipta asli atau pemegang hak cipta atas Karya. Untuk Lisensi ini, Pembuat adalah NexCaise, kecuali dinyatakan lain pada Karya yang bersangkutan.
+
+"Pemilik" berarti Pembuat atau orang atau entitas lain yang secara sah memiliki hak cipta atau hak distribusi atas Karya yang bersangkutan dan berwenang menetapkan pembatasan distribusi berdasarkan Lisensi ini.
+
+"Pengguna" berarti individu yang menerima, mengakses, menggunakan, memodifikasi, atau mendistribusikan Karya berdasarkan Lisensi ini.
+
+"Penggunaan Pribadi" berarti penggunaan oleh seorang individu untuk keperluan pribadi dan non-komersial. Penggunaan Pribadi tidak mencakup penggunaan oleh perusahaan, organisasi, bisnis, atau entitas komersial lainnya.
+
+"Penggunaan Komersial" berarti penggunaan Karya atau Karya Turunan untuk memperoleh pendapatan komersial atau menyediakan produk atau layanan komersial, termasuk tetapi tidak terbatas pada menjual perangkat lunak, memasukkan Karya ke dalam perangkat lunak berbayar, atau menggunakan Karya untuk membuat produk komersial.
+
+"Distribusi Terbatas" berarti distribusi Karya atau salinan tertentu dari Karya yang dilakukan oleh Pembuat atau Pemilik melalui metode distribusi yang ditentukan atau dikendalikan, termasuk tetapi tidak terbatas pada link pribadi atau terbatas, link unduhan khusus, website dengan akses terbatas atau berbasis undangan, private repository, server dengan autentikasi, private channel, transfer langsung, atau metode distribusi tertentu lainnya yang ditetapkan oleh Pembuat atau Pemilik sebagai terbatas.
+
+"Saluran Distribusi Resmi" berarti website, repository, server, link, channel, lokasi penyimpanan, atau metode distribusi lainnya yang secara tegas ditentukan oleh Pembuat atau Pemilik untuk mendistribusikan Karya yang bersangkutan.
+
+---
+
+2. GRANT OF LICENSE / PEMBERIAN LISENSI
+
+[EN]
+
+This Work is licensed, not sold.
+
+Subject to the terms of this License, the Author grants the User a limited, non-exclusive, non-transferable license to:
+
+a. use the Work for Personal Use;
+
+b. access and inspect the source code where source code is provided;
+
+c. modify the Work for Personal Use;
+
+d. create Derivative Works for Personal Use; and
+
+e. distribute the Work or a Derivative Work publicly, provided that all requirements of this License are satisfied.
+
+This License does not grant permission for Commercial Use unless the Author provides explicit written permission.
+
+Nothing in this Section overrides the Restricted Distribution requirements of Section 4.
+
+[ID]
+
+Karya ini dilisensikan, bukan dijual.
+
+Dengan tunduk pada ketentuan Lisensi ini, Pembuat memberikan kepada Pengguna lisensi terbatas, non-eksklusif, dan tidak dapat dialihkan untuk:
+
+a. menggunakan Karya untuk Penggunaan Pribadi;
+
+b. mengakses dan memeriksa kode sumber apabila kode sumber disediakan;
+
+c. memodifikasi Karya untuk Penggunaan Pribadi;
+
+d. membuat Karya Turunan untuk Penggunaan Pribadi; dan
+
+e. mendistribusikan Karya atau Karya Turunan secara publik, dengan ketentuan seluruh persyaratan dalam Lisensi ini dipenuhi.
+
+Lisensi ini tidak memberikan izin untuk Penggunaan Komersial kecuali Pembuat memberikan izin tertulis secara eksplisit.
+
+Tidak ada ketentuan dalam Pasal ini yang mengesampingkan ketentuan Distribusi Terbatas dalam Pasal 4.
+
+---
+
+3. ATTRIBUTION REQUIREMENT / KEWAJIBAN ATRIBUSI
+
+[EN]
+
+Any public distribution, redistribution, publication, or sharing of the Work or any Derivative Work must include clear, visible, and appropriate attribution to the Author.
+
+The attribution must include:
+
+- the name "NexCaise" or "NexCaise Team";
+- the copyright notice of the applicable Work;
+- the original copyright year of the Work;
+- the year in which the Derivative Work or fork was created;
+- an indication that the distributed material is based on or derived from the original Work; and
+- a statement that the Derivative Work is not an official version of the original Work.
+
+The attribution must not imply endorsement, sponsorship, partnership, or official affiliation with the Author unless explicitly authorized in writing.
+
+The attribution must be placed in a reasonable and reasonably visible location, such as a README, documentation, credits section, source file, application UI, or other location appropriate to the nature of the Work.
+
+A Derivative Work must preserve existing copyright, license, and attribution notices from the Original Work, except where removal is technically necessary and the same information is reproduced in an equivalent or more appropriate location.
+
+[ID]
+
+Setiap distribusi publik, redistribusi, publikasi, atau pembagian Karya maupun Karya Turunan wajib menyertakan atribusi yang jelas, terlihat, dan pantas kepada Pembuat.
+
+Atribusi wajib mencantumkan:
+
+- nama "NexCaise" atau "NexCaise Team";
+- pemberitahuan hak cipta dari Karya yang bersangkutan;
+- tahun hak cipta asli Karya;
+- tahun pembuatan Karya Turunan atau fork;
+- keterangan bahwa materi yang didistribusikan didasarkan pada atau merupakan turunan dari Karya asli; dan
+- pernyataan bahwa Karya Turunan tersebut bukan versi resmi dari Karya asli.
+
+Atribusi tidak boleh menyiratkan dukungan, sponsor, kemitraan, atau hubungan resmi dengan Pembuat kecuali telah diberikan izin tertulis secara eksplisit.
+
+Atribusi harus ditempatkan pada lokasi yang wajar dan cukup terlihat, seperti README, dokumentasi, bagian kredit, berkas sumber, antarmuka aplikasi, atau lokasi lain yang sesuai dengan sifat Karya.
+
+Karya Turunan wajib mempertahankan pemberitahuan hak cipta, lisensi, dan atribusi yang terdapat pada Karya Asli, kecuali jika penghapusan secara teknis diperlukan dan informasi yang sama dicantumkan kembali pada lokasi yang setara atau lebih sesuai.
+
+---
+
+4. RESTRICTED DISTRIBUTION / DISTRIBUSI TERBATAS
+
+[EN]
+
+If the Author or Owner distributes the Work, or a particular copy of the Work, through a Restricted Distribution method or an Authorized Distribution Channel designated as restricted, the User shall NOT:
+
+a. redistribute, re-upload, mirror, re-host, republish, or otherwise provide that Work or copy to another person through an unauthorized channel;
+
+b. share, publish, expose, or forward a private or restricted download link, access credential, invitation, token, or other access mechanism intended for the User's individual or limited access;
+
+c. create or maintain an unauthorized mirror or alternative download source for the restricted Work or copy;
+
+d. bypass or remove access controls, authentication requirements, invitation requirements, or other technical restrictions used to limit distribution; or
+
+e. provide access to the restricted Work or copy to any other person unless the Author or Owner has expressly authorized such redistribution.
+
+A Restricted Distribution does not automatically become public or unrestricted merely because the User has lawfully obtained access to it.
+
+The existence of a public website, repository, or download page does not by itself make a distribution unrestricted. The distribution status shall be determined by the terms stated by the Author or Owner at the time of distribution.
+
+Where the Author or Owner clearly identifies a distribution as unrestricted or publicly redistributable, the restrictions in this Section do not apply to that distribution, except for the other requirements of this License.
+
+[ID]
+
+Apabila Pembuat atau Pemilik mendistribusikan Karya, atau salinan tertentu dari Karya, melalui metode Distribusi Terbatas atau Saluran Distribusi Resmi yang ditetapkan sebagai terbatas, Pengguna DILARANG untuk:
+
+a. mendistribusikan ulang, mengunggah ulang, membuat mirror, melakukan re-host, mempublikasikan ulang, atau dengan cara lain menyediakan Karya atau salinan tersebut kepada orang lain melalui saluran yang tidak sah;
+
+b. membagikan, mempublikasikan, mengekspos, atau meneruskan link unduhan pribadi atau terbatas, kredensial akses, undangan, token, atau mekanisme akses lain yang ditujukan untuk akses individual atau terbatas milik Pengguna;
+
+c. membuat atau mempertahankan mirror atau sumber unduhan alternatif yang tidak diizinkan untuk Karya atau salinan yang didistribusikan secara terbatas;
+
+d. melewati atau menghapus kontrol akses, persyaratan autentikasi, persyaratan undangan, atau pembatasan teknis lainnya yang digunakan untuk membatasi distribusi; atau
+
+e. memberikan akses kepada orang lain atas Karya atau salinan yang dibatasi tersebut kecuali Pembuat atau Pemilik secara tegas mengizinkan redistribusi tersebut.
+
+Distribusi Terbatas tidak secara otomatis menjadi publik atau tidak terbatas hanya karena Pengguna memperoleh akses secara sah.
+
+Keberadaan website, repository, atau halaman unduhan publik tidak dengan sendirinya menjadikan suatu distribusi tidak terbatas. Status distribusi ditentukan berdasarkan ketentuan yang dinyatakan oleh Pembuat atau Pemilik pada saat distribusi dilakukan.
+
+Apabila Pembuat atau Pemilik secara jelas menyatakan bahwa suatu distribusi tidak terbatas atau dapat didistribusikan ulang secara publik, pembatasan dalam Pasal ini tidak berlaku terhadap distribusi tersebut, dengan tetap tunduk pada ketentuan lainnya dalam Lisensi ini.
+
+---
+
+5. RESTRICTIONS / PEMBATASAN
+
+[EN]
+
+The User shall NOT:
+
+a. claim authorship of the Original Work or represent the Original Work as their own;
+
+b. claim ownership of the copyright in the Original Work;
+
+c. remove, alter, or obscure copyright, license, or attribution notices, except as permitted by Section 3;
+
+d. use the Work for Commercial Use without explicit written permission from the Author;
+
+e. sell the Work or any Derivative Work without explicit written permission from the Author;
+
+f. incorporate the Work into paid or commercially distributed software without explicit written permission from the Author;
+
+g. use the Work to create or provide a commercial product or service without explicit written permission from the Author;
+
+h. sublicense the Original Work under terms that conflict with this License;
+
+i. imply that a Derivative Work is an official release, product, or project of the Author;
+
+j. use the name or logo of the Author for purposes other than accurate attribution without explicit written permission;
+
+k. violate the Restricted Distribution requirements in Section 4; or
+
+l. use the Work in any manner that violates applicable laws or regulations.
+
+[ID]
+
+Pengguna DILARANG untuk:
+
+a. mengklaim kepengarangan atas Karya Asli atau menyatakan Karya Asli sebagai miliknya;
+
+b. mengklaim kepemilikan hak cipta atas Karya Asli;
+
+c. menghapus, mengubah, atau menyembunyikan pemberitahuan hak cipta, lisensi, atau atribusi, kecuali sebagaimana diizinkan dalam Pasal 3;
+
+d. menggunakan Karya untuk Penggunaan Komersial tanpa izin tertulis secara eksplisit dari Pembuat;
+
+e. menjual Karya atau Karya Turunan tanpa izin tertulis secara eksplisit dari Pembuat;
+
+f. memasukkan Karya ke dalam perangkat lunak berbayar atau didistribusikan secara komersial tanpa izin tertulis secara eksplisit dari Pembuat;
+
+g. menggunakan Karya untuk membuat atau menyediakan produk atau layanan komersial tanpa izin tertulis secara eksplisit dari Pembuat;
+
+h. mensublisensikan Karya Asli dengan ketentuan yang bertentangan dengan Lisensi ini;
+
+i. menyiratkan bahwa Karya Turunan merupakan rilis, produk, atau proyek resmi dari Pembuat;
+
+j. menggunakan nama atau logo Pembuat untuk tujuan selain atribusi yang akurat tanpa izin tertulis secara eksplisit;
+
+k. melanggar ketentuan Distribusi Terbatas dalam Pasal 4; atau
+
+l. menggunakan Karya dengan cara yang melanggar hukum atau peraturan yang berlaku.
+
+---
+
+6. DERIVATIVE WORKS / KARYA TURUNAN
+
+[EN]
+
+The User may create Derivative Works for Personal Use, including modifications, feature removal, adaptations, and combinations with other software or projects.
+
+Derivative Works may be publicly distributed provided that:
+
+a. the attribution requirements in Section 3 are satisfied;
+
+b. all applicable restrictions in this License are satisfied;
+
+c. the Derivative Work is clearly identified as a derivative or modified version;
+
+d. the Derivative Work is clearly stated not to be an official version of the Original Work; and
+
+e. the Derivative Work is not sold or used for Commercial Use without explicit written permission from the Author.
+
+The creation of a Derivative Work does not transfer ownership of the Original Work to the User.
+
+This License does not require the User to disclose, publish, or distribute the source code of a Derivative Work, provided that all other terms of this License are satisfied.
+
+Copyright in original material independently created by the User remains with the User, to the extent permitted by applicable law. Such material remains subject to this License insofar as it incorporates, contains, or depends upon the Original Work.
+
+[ID]
+
+Pengguna dapat membuat Karya Turunan untuk Penggunaan Pribadi, termasuk modifikasi, penghapusan fitur, adaptasi, dan penggabungan dengan perangkat lunak atau proyek lain.
+
+Karya Turunan dapat didistribusikan secara publik dengan ketentuan:
+
+a. persyaratan atribusi dalam Pasal 3 dipenuhi;
+
+b. seluruh pembatasan yang berlaku dalam Lisensi ini dipenuhi;
+
+c. Karya Turunan dinyatakan secara jelas sebagai versi turunan atau versi yang telah dimodifikasi;
+
+d. Karya Turunan dinyatakan secara jelas bukan merupakan versi resmi dari Karya Asli; dan
+
+e. Karya Turunan tidak dijual atau digunakan untuk Penggunaan Komersial tanpa izin tertulis secara eksplisit dari Pembuat.
+
+Pembuatan Karya Turunan tidak mengalihkan kepemilikan Karya Asli kepada Pengguna.
+
+Lisensi ini tidak mewajibkan Pengguna untuk mengungkapkan, mempublikasikan, atau mendistribusikan kode sumber Karya Turunan, selama seluruh ketentuan lain dalam Lisensi ini dipenuhi.
+
+Hak cipta atas materi orisinal yang dibuat secara independen oleh Pengguna tetap menjadi milik Pengguna, sejauh diperbolehkan oleh hukum yang berlaku. Materi tersebut tetap tunduk pada Lisensi ini sejauh materi tersebut memasukkan, mengandung, atau bergantung pada Karya Asli.
+
+---
+
+7. OWNERSHIP / KEPEMILIKAN
+
+[EN]
+
+The Author retains all right, title, and interest in and to the Original Work, including all copyrights and other intellectual property rights owned by the Author.
+
+This License does not transfer ownership of the Original Work to the User.
+
+Nothing in this License shall be interpreted as transferring ownership of the Author's intellectual property to the User.
+
+Rights in original material created independently by the User remain with the User, subject to the rights and restrictions applicable to the Original Work under this License.
+
+[ID]
+
+Pembuat tetap memiliki seluruh hak, kepemilikan, dan kepentingan atas Karya Asli, termasuk seluruh hak cipta dan hak kekayaan intelektual lainnya yang dimiliki oleh Pembuat.
+
+Lisensi ini tidak mengalihkan kepemilikan Karya Asli kepada Pengguna.
+
+Tidak ada ketentuan dalam Lisensi ini yang dapat ditafsirkan sebagai pengalihan kepemilikan kekayaan intelektual Pembuat kepada Pengguna.
+
+Hak atas materi orisinal yang dibuat secara independen oleh Pengguna tetap menjadi milik Pengguna, dengan tetap tunduk pada hak dan pembatasan yang berlaku terhadap Karya Asli berdasarkan Lisensi ini.
+
+---
+
+8. TERMINATION / PENGAKHIRAN
+
+[EN]
+
+This License shall automatically terminate upon any material violation of its terms by the User.
+
+Upon termination, the User must immediately:
+
+a. cease all use of the Work and any Derivative Work that incorporates the Work;
+
+b. cease all distribution, publication, or sharing of the Work and such Derivative Works;
+
+c. cease all access to Restricted Distribution copies or restricted access mechanisms; and
+
+d. delete all copies of the Work and such Derivative Works under the User's control, including copies used for Personal Use, to the extent reasonably possible.
+
+Termination does not affect rights that cannot lawfully be terminated under applicable law.
+
+[ID]
+
+Lisensi ini akan berakhir secara otomatis apabila Pengguna melakukan pelanggaran material terhadap ketentuannya.
+
+Setelah pengakhiran, Pengguna wajib segera:
+
+a. menghentikan seluruh penggunaan Karya dan Karya Turunan yang memasukkan Karya;
+
+b. menghentikan seluruh distribusi, publikasi, atau pembagian Karya dan Karya Turunan tersebut;
+
+c. menghentikan seluruh akses terhadap salinan yang didistribusikan secara terbatas atau mekanisme akses terbatas; dan
+
+d. menghapus seluruh salinan Karya dan Karya Turunan tersebut yang berada di bawah kendali Pengguna, termasuk salinan yang digunakan untuk Penggunaan Pribadi, sejauh secara wajar memungkinkan.
+
+Pengakhiran tidak memengaruhi hak yang menurut hukum yang berlaku tidak dapat diakhiri.
+
+---
+
+9. DISCLAIMER OF WARRANTY / PENAFIAN JAMINAN
+
+[EN]
+
+THE WORK IS PROVIDED "AS IS" AND "AS AVAILABLE", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW.
+
+THE AUTHOR DISCLAIMS ALL WARRANTIES, INCLUDING BUT NOT LIMITED TO WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE, TITLE, AND NON-INFRINGEMENT, TO THE MAXIMUM EXTENT PERMITTED BY LAW.
+
+THE USER ASSUMES ALL RISK ARISING FROM THE USE, MODIFICATION, DISTRIBUTION, OR INABILITY TO USE THE WORK.
+
+[ID]
+
+KARYA DISEDIAKAN "SEBAGAIMANA ADANYA" DAN "SEBAGAIMANA TERSEDIA", TANPA JAMINAN DALAM BENTUK APA PUN, BAIK TERSURAT MAUPUN TERSIRAT, SEJAUH DIIZINKAN OLEH HUKUM YANG BERLAKU.
+
+PEMBUAT MENYANGKAL SELURUH JAMINAN, TERMASUK NAMUN TIDAK TERBATAS PADA JAMINAN KELAYAKAN UNTUK DIPERDAGANGKAN, KESESUAIAN UNTUK TUJUAN TERTENTU, KEPEMILIKAN, DAN TIDAK ADANYA PELANGGARAN HAK, SEJAUH DIIZINKAN OLEH HUKUM.
+
+PENGGUNA MENANGGUNG SELURUH RISIKO YANG TIMBUL DARI PENGGUNAAN, MODIFIKASI, DISTRIBUSI, ATAU KETIDAKMAMPUAN MENGGUNAKAN KARYA.
+
+---
+
+10. LIMITATION OF LIABILITY / PEMBATASAN TANGGUNG JAWAB
+
+[EN]
+
+TO THE MAXIMUM EXTENT PERMITTED BY APPLICABLE LAW, THE AUTHOR SHALL NOT BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, CONSEQUENTIAL, EXEMPLARY, OR OTHER DAMAGES ARISING OUT OF OR RELATED TO THE USE, MODIFICATION, DISTRIBUTION, OR INABILITY TO USE THE WORK.
+
+NOTHING IN THIS LICENSE EXCLUDES OR LIMITS LIABILITY THAT CANNOT LAWFULLY BE EXCLUDED OR LIMITED UNDER APPLICABLE LAW.
+
+[ID]
+
+SEJAUH DIIZINKAN OLEH HUKUM YANG BERLAKU, PEMBUAT TIDAK BERTANGGUNG JAWAB ATAS KERUGIAN LANGSUNG, TIDAK LANGSUNG, INSIDENTAL, KHUSUS, KONSEKUENSIAL, EKSEMPLER, ATAU KERUGIAN LAINNYA YANG TIMBUL DARI ATAU BERKAITAN DENGAN PENGGUNAAN, MODIFIKASI, DISTRIBUSI, ATAU KETIDAKMAMPUAN MENGGUNAKAN KARYA.
+
+Tidak ada ketentuan dalam Lisensi ini yang mengecualikan atau membatasi tanggung jawab yang menurut hukum yang berlaku tidak dapat dikecualikan atau dibatasi.
+
+---
+
+11. SEVERABILITY / KETERPISAHAN KETENTUAN
+
+[EN]
+
+If any provision of this License is determined to be invalid, illegal, or unenforceable, that provision shall be enforced to the maximum extent permitted by law, and the remaining provisions shall remain in full force and effect.
+
+[ID]
+
+Apabila salah satu ketentuan dalam Lisensi ini dinyatakan tidak sah, ilegal, atau tidak dapat diberlakukan, ketentuan tersebut tetap diberlakukan sejauh maksimum yang diizinkan oleh hukum, dan ketentuan lainnya tetap berlaku sepenuhnya.
+
+---
+
+12. GOVERNING LANGUAGE / BAHASA YANG BERLAKU
+
+[EN]
+
+This License is provided in English and Indonesian.
+
+In the event of any inconsistency, ambiguity, or conflict between the English and Indonesian versions, the English version shall prevail.
+
+[ID]
+
+Lisensi ini disediakan dalam bahasa Inggris dan bahasa Indonesia.
+
+Apabila terdapat ketidaksesuaian, ambiguitas, atau konflik antara versi bahasa Inggris dan bahasa Indonesia, versi bahasa Inggris yang berlaku.
+
+---
+
+13. ENTIRE AGREEMENT / KESELURUHAN PERJANJIAN
+
+[EN]
+
+This License constitutes the entire agreement between the Author and the User concerning the Work and supersedes any prior or contemporaneous understanding concerning the licensing of the Work, except for separate written permissions or agreements expressly issued by the Author.
+
+Any additional permission granted by the Author must be provided in writing.
+
+[ID]
+
+Lisensi ini merupakan keseluruhan perjanjian antara Pembuat dan Pengguna mengenai Karya dan menggantikan pemahaman sebelumnya atau yang dibuat pada waktu yang sama mengenai pemberian lisensi atas Karya, kecuali untuk izin atau perjanjian tertulis terpisah yang secara tegas diberikan oleh Pembuat.
+
+Setiap izin tambahan yang diberikan oleh Pembuat harus diberikan secara tertulis.
+
+---
+
+14. COPYRIGHT NOTICE / PEMBERITAHUAN HAK CIPTA
+
+[EN]
+
+Copyright © 2026 NexCaise. All Rights Reserved.
+
+This Work is licensed under the Custom Proprietary / Source-Available License (CPNC) v1.0.
+
+Unauthorized Commercial Use and Unauthorized Redistribution of Restricted Distributions are prohibited.
+
+[ID]
+
+Hak Cipta © 2026 NexCaise. Seluruh Hak Dilindungi.
+
+Karya ini dilisensikan berdasarkan Custom Proprietary / Source-Available License (CPNC) v1.0.
+
+Penggunaan Komersial tanpa izin dan Redistribusi tanpa izin terhadap Distribusi Terbatas dilarang.

@@ -46,7 +46,7 @@ const char *kModId = "BetterThirdPerson";
 const char *kButtonId = "betterthirdperson.toggle";
 const char *kUseCustomButtonKey = "use_custom_button";
 const char *kButtonOpacityKey = "button_opacity";
-const char *kSchemeModeKey = "game_scheme_mode";
+const char *kModeKey = "mode";
 const char *kTurnSpeedKey = "turn_speed";
 
 // ControlSchemeComponent byte values handled by the game's input transform
@@ -62,7 +62,7 @@ std::atomic_bool g_useCustomButton{true};
 std::atomic_bool g_buttonRegistered{false};
 std::atomic<float> g_buttonOpacity{1.0f};
 std::atomic_bool g_logNextTransform{false};
-std::atomic_bool g_schemeMode{false};         // experimental game-scheme mode
+std::atomic<int> g_mode{0};                   // 0 = FreeLook (original), 1 = BTP game scheme, 2 = BTP head-only
 std::atomic<float> g_turnSpeed{30.0f};        // degrees per tick (head mode)
 std::mutex g_buttonRegistryMutex;
 
@@ -87,8 +87,16 @@ bool featureOn() noexcept {
            g_active.load(std::memory_order_relaxed);
 }
 
-bool schemeModeOn() noexcept { return featureOn() && g_schemeMode.load(std::memory_order_relaxed); }
-bool headModeOn() noexcept { return featureOn() && !g_schemeMode.load(std::memory_order_relaxed); }
+bool freeLookModeOn() noexcept { return featureOn() && g_mode.load(std::memory_order_relaxed) == 0; }
+bool schemeModeOn() noexcept { return featureOn() && g_mode.load(std::memory_order_relaxed) == 1; }
+bool headModeOn() noexcept { return featureOn() && g_mode.load(std::memory_order_relaxed) == 2; }
+// FreeLook's camera hooks (A + D) are used by the original FreeLook mode and by the game-scheme BTP mode.
+bool cameraDetached() noexcept { return freeLookModeOn() || schemeModeOn(); }
+
+// FreeLook head lock state (ported 1:1 from FreeLook).
+std::atomic_bool g_headCapturePending{false};
+std::atomic_bool g_headRotationLocked{false};
+std::atomic<float> g_lockedHeadYaw{0.0f};
 
 void logInfo(const std::string &msg) {
     btp::BetterThirdPerson::getInstance().getSelf().getLogger().info("{}", msg);
@@ -98,7 +106,9 @@ void setActive(bool on) noexcept {
     g_active.store(on, std::memory_order_release);
     g_logNextTransform.store(on, std::memory_order_release);
     g_dbgBudget.store(on ? 12 : 0, std::memory_order_relaxed);
-    logInfo(std::string("BTP button: ") + (on ? "ON" : "OFF") + (g_schemeMode.load() ? " (scheme mode)" : " (head mode)"));
+    g_headCapturePending.store(on, std::memory_order_release);
+    g_headRotationLocked.store(false, std::memory_order_release);
+    logInfo(std::string("BTP button: ") + (on ? "ON" : "OFF") + (" (mode " + std::to_string(g_mode.load()) + ")"));
 }
 
 // Cheap "is this memory mapped" test: write() copies from the buffer and fails
@@ -117,6 +127,29 @@ bool readable(const void *p, size_t n) noexcept {
     return true;
 }
 
+
+// ---- FREELOOK mode (ported from FreeLook): keep the head yaw locked ----------------
+void freeLookLock() noexcept {
+    if (!freeLookModeOn() || !g_clientInstance) return;
+    Actor *player = g_clientInstance->getLocalPlayer();
+    if (!player) return;
+
+    auto *headRotation = player->tryGetComponent<ActorHeadRotationComponent>();
+    if (!headRotation) return;
+
+    if (g_headCapturePending.load(std::memory_order_acquire)) {
+        if (!std::isfinite(headRotation->mYHeadRot)) return;
+        g_lockedHeadYaw.store(headRotation->mYHeadRot, std::memory_order_relaxed);
+        g_headCapturePending.store(false, std::memory_order_release);
+        g_headRotationLocked.store(true, std::memory_order_release);
+    }
+    if (!g_headRotationLocked.load(std::memory_order_acquire)) return;
+
+    const float lockedYaw = g_lockedHeadYaw.load(std::memory_order_relaxed);
+    if (!std::isfinite(lockedYaw)) return;
+    headRotation->mYHeadRotOld = lockedYaw;
+    headRotation->mYHeadRot = lockedYaw;
+}
 
 // ---- HEAD mode: steer head/body yaw toward the real heading ----------------------
 constexpr float kRadToDeg = 57.29577951f;
@@ -307,9 +340,12 @@ void onConfigChanged(std::string_view, std::string_view key, std::string_view va
         return;
     }
 
-    if (key == kSchemeModeKey) {
-        g_schemeMode.store(value == "true" || value == "1" || value == "on" || value == "enabled", std::memory_order_relaxed);
-        logInfo(std::string("BTP mode: ") + (g_schemeMode.load() ? "GAME-SCHEME (experimental)" : "HEAD"));
+    if (key == kModeKey) {
+        const int m = std::clamp(static_cast<int>(parseOpacity(value, 0.01f) * 100.0f + 0.5f), 0, 2);
+        g_mode.store(m, std::memory_order_relaxed);
+        g_headCapturePending.store(g_active.load(), std::memory_order_release);
+        g_headRotationLocked.store(false, std::memory_order_release);
+        logInfo("BTP mode set to " + std::to_string(m));
         return;
     }
     if (key == kTurnSpeedKey) {
@@ -387,12 +423,14 @@ bool registerUi() {
     turn.maxValue = "90";
     module.configs.push_back(turn);
 
-    pl::modmenu::ConfigEntry scheme{};
-    scheme.key = kSchemeModeKey;
-    scheme.displayName = "Experimental: use game camera-relative scheme";
-    scheme.type = pl::modmenu::ConfigType::Toggle;
-    scheme.defaultValue = "false";
-    module.configs.push_back(scheme);
+    pl::modmenu::ConfigEntry mode{};
+    mode.key = kModeKey;
+    mode.displayName = "Mode: 0 = FreeLook (original), 1 = Better Third Person, 2 = BTP head-only";
+    mode.type = pl::modmenu::ConfigType::SliderInt;
+    mode.defaultValue = "0";
+    mode.minValue = "0";
+    mode.maxValue = "2";
+    module.configs.push_back(mode);
 
     module.onToggle = onModuleToggle;
     module.onConfigChanged = onConfigChanged;
@@ -481,7 +519,7 @@ LL_STATIC_HOOK(
     "libminecraftpe.so",
     void, void *cameraComponent, void *a2, void *a3
 ) {
-    if (!schemeModeOn()) origin(cameraComponent, a2, a3);
+    if (!cameraDetached()) origin(cameraComponent, a2, a3);
 }
 
 // Hook 3 (FreeLook hook D): VanillaCameraAPI slot 7 reports 1 while ON.
@@ -492,18 +530,22 @@ LL_STATIC_HOOK(
     "libminecraftpe.so",
     int, void *a1
 ) {
-    if (!schemeModeOn()) return origin(a1);
+    if (!cameraDetached()) return origin(a1);
     return 1;
 }
 
 // FreeLook hooks C/E: LocalPlayer tick and Mob tick (HEAD mode writes the head/body yaw here).
 LL_TYPED_HOOK(BtpLocalTick, memory::HookPriority::Normal, Actor, g_addressTick, "libminecraftpe.so", void) {
+    freeLookLock(); // FreeLook: lock before and after the original tick
     origin();
+    freeLookLock();
     onLocalPlayerTick(static_cast<Actor *>(this));
 }
 
 LL_TYPED_HOOK(BtpMobTick, memory::HookPriority::Normal, Actor, g_addressMob, "libminecraftpe.so", void) {
+    freeLookLock();
     origin();
+    freeLookLock();
     onOtherTick(static_cast<Actor *>(this));
 }
 

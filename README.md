@@ -11,19 +11,17 @@ FreeLook. This is an **unofficial derivative work**, not an official version of 
 with the Java "Better Third Person" mod or its authors (no code from that mod was used, only its publicly
 described behavior). Do not sell it.
 
-## How it works (this game build)
-Two modes (Mod Menu toggle "Experimental: use game camera-relative scheme"):
+## Modes (Mod Menu slider "Mode")
+The on-screen button toggles whichever mode is selected. It starts on **mode 0**, which is FreeLook's own logic
+ported 1:1, so the button behaves exactly like FreeLook's. Use it first to confirm the hooks work, then try 1 and 2.
 
-- **HEAD mode (default)** - built on FreeLook's tick hooks (the same place FreeLook locks the head yaw).
-  Camera, movement and aiming stay vanilla. Each tick the mod reads the raw movement input (captured from the
-  game's input-transform function) and computes the real heading as `camera yaw - atan2(input.x, input.y)`
-  (the formula the game itself uses for its camera-relative scheme), then smoothly steers the head and body yaw
-  toward it. Body yaw uses an assumed layout that is sanity-checked at runtime (head only if rejected).
-- **GAME-SCHEME mode (experimental)** - forces the game's "camera relative" control scheme (value 1) for the
-  input-transform step and uses FreeLook's camera hooks (skip camera->player rotation sync, camera free).
-
-The launch log prints `BTP:` lines (hook running, button state, first few heading values) so problems can be
-diagnosed from a screenshot.
+- **0 - FreeLook (original):** skips the camera->player rotation sync, keeps the camera free, locks the head yaw
+  (FreeLook hooks A, D, C, E).
+- **1 - Better Third Person (game scheme):** same camera hooks as FreeLook (A, D), no head lock; also forces the
+  game's own "camera relative" control scheme for the input-transform step so movement follows the camera and the
+  character turns toward the movement direction.
+- **2 - BTP head-only:** camera, movement and aiming stay vanilla; the head/body yaw is steered toward the real
+  heading (`camera yaw - atan2(input.x, input.y)`, the game's own formula) from FreeLook's tick hooks.
 
 ## Known limits
 - HEAD mode only changes how the model faces; scheme mode also turns the real player rotation, so aiming then

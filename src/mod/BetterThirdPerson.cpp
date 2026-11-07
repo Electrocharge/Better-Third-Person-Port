@@ -7,18 +7,22 @@
  * and the HUD-button code come from FreeLook. NOT an official version of
  * FreeLook and not affiliated with the Java mod or its authors.
  *
- * How it works: Bedrock's own CameraInputTransformSystem already knows a
- * "camera relative" control scheme that (a) converts the joystick/keys into
- * camera-relative movement and (b) turns the player toward the movement
- * direction. While the HUD button is ON we
- *   1. force that control scheme for the movement-input step,
- *   2. stop the camera from dragging the player's rotation (FreeLook hook A),
- *   3. keep the camera "free" (FreeLook hook D).
- * Result: free orbit camera, character walks/turns toward where you move.
+ * How it works (two modes, switch in the Mod Menu):
+ *
+ *  HEAD mode (default, built on FreeLook's proven tick hooks): the camera and your
+ *  movement stay vanilla (movement is camera-relative, aiming is unchanged). Each tick the
+ *  mod reads the raw movement input, works out which way you are really heading
+ *  (camera yaw minus the input angle - the same formula the game uses for its own
+ *  camera-relative scheme) and smoothly steers the head/body yaw toward it, exactly where
+ *  FreeLook locks the head yaw.
+ *
+ *  GAME-SCHEME mode (experimental): forces the game's own "camera relative" control scheme
+ *  and uses FreeLook's camera hooks so the camera is fully detached from the player.
  */
 #include "mod/BetterThirdPerson.h"
 #include "mod/icons.hpp"
 #include "mc/ClientInstance.h"
+#include "mc/MobBodyRotationComponent.h"
 #include "pl_modmenu_compat.hpp"
 
 #include <fcntl.h>
@@ -42,6 +46,8 @@ const char *kModId = "BetterThirdPerson";
 const char *kButtonId = "betterthirdperson.toggle";
 const char *kUseCustomButtonKey = "use_custom_button";
 const char *kButtonOpacityKey = "button_opacity";
+const char *kSchemeModeKey = "game_scheme_mode";
+const char *kTurnSpeedKey = "turn_speed";
 
 // ControlSchemeComponent byte values handled by the game's input transform
 // (verified in libminecraftpe.so): 1 = camera relative (turns the player toward
@@ -56,9 +62,21 @@ std::atomic_bool g_useCustomButton{true};
 std::atomic_bool g_buttonRegistered{false};
 std::atomic<float> g_buttonOpacity{1.0f};
 std::atomic_bool g_logNextTransform{false};
+std::atomic_bool g_schemeMode{false};         // experimental game-scheme mode
+std::atomic<float> g_turnSpeed{30.0f};        // degrees per tick (head mode)
 std::mutex g_buttonRegistryMutex;
 
+// Latest raw input/rotation seen by the game's input-transform function (written there, read in tick hooks).
+std::atomic<float> g_inX{0.0f};
+std::atomic<float> g_inY{0.0f};
+std::atomic<float> g_playerYaw{0.0f};
+std::atomic_bool g_haveInput{false};
+std::atomic_bool g_seenTransform{false};
+std::atomic<int> g_dbgBudget{0};
+
 uintptr_t g_addressCameraA = 0;  // camera -> player rotation sync (FreeLook hook A)
+uintptr_t g_addressTick = 0;     // LocalPlayer tick (FreeLook hook C)
+uintptr_t g_addressMob = 0;      // Mob tick (FreeLook hook E)
 uintptr_t g_addressScheme = 0;   // CameraInputTransformSystem per-entity function
 
 void onButtonEvent(std::string_view, pl::modmenu::ButtonEvent event, float value);
@@ -69,9 +87,18 @@ bool featureOn() noexcept {
            g_active.load(std::memory_order_relaxed);
 }
 
+bool schemeModeOn() noexcept { return featureOn() && g_schemeMode.load(std::memory_order_relaxed); }
+bool headModeOn() noexcept { return featureOn() && !g_schemeMode.load(std::memory_order_relaxed); }
+
+void logInfo(const std::string &msg) {
+    btp::BetterThirdPerson::getInstance().getSelf().getLogger().info("{}", msg);
+}
+
 void setActive(bool on) noexcept {
     g_active.store(on, std::memory_order_release);
     g_logNextTransform.store(on, std::memory_order_release);
+    g_dbgBudget.store(on ? 12 : 0, std::memory_order_relaxed);
+    logInfo(std::string("BTP button: ") + (on ? "ON" : "OFF") + (g_schemeMode.load() ? " (scheme mode)" : " (head mode)"));
 }
 
 // Cheap "is this memory mapped" test: write() copies from the buffer and fails
@@ -88,6 +115,115 @@ bool readable(const void *p, size_t n) noexcept {
     char sink[64];
     (void) ::read(fds[0], sink, sizeof(sink));
     return true;
+}
+
+
+// ---- HEAD mode: steer head/body yaw toward the real heading ----------------------
+constexpr float kRadToDeg = 57.29577951f;
+
+struct FacingState {
+    Actor *actor = nullptr;
+    uint32_t entity = 0xFFFFFFFFu;
+    bool init = false;
+    bool bodyChecked = false;
+    bool bodyOk = false;
+    float prev = 0.0f;
+    float cur = 0.0f;
+} g_state;
+
+float wrap180(float a) noexcept {
+    a = std::fmod(a + 180.0f, 360.0f);
+    if (a < 0.0f) a += 360.0f;
+    return a - 180.0f;
+}
+
+bool plausibleYaw(float v) noexcept { return std::isfinite(v) && std::fabs(v) < 100000.0f; }
+
+bool isLocalPlayer(Actor *actor) noexcept {
+    return g_clientInstance && actor && actor == g_clientInstance->getLocalPlayer();
+}
+
+void stepFacing(Actor *player) noexcept {
+    auto *head = player->tryGetComponent<ActorHeadRotationComponent>();
+    if (!head || !readable(head, sizeof(*head)) || !plausibleYaw(head->mYHeadRot)) return;
+
+    const uint32_t entity = player->mEntityContext.entity.rawId;
+    if (!g_state.init || g_state.actor != player || g_state.entity != entity) {
+        g_state = FacingState{};
+        g_state.init = true;
+        g_state.actor = player;
+        g_state.entity = entity;
+        g_state.cur = g_state.prev = head->mYHeadRot;
+    }
+
+    if (!g_state.bodyChecked) {
+        g_state.bodyChecked = true;
+        auto *body = player->tryGetComponent<MobBodyRotationComponent>();
+        if (body && readable(body, sizeof(*body)) && plausibleYaw(body->mYBodyRot) &&
+            plausibleYaw(body->mYBodyRotOld) &&
+            std::fabs(wrap180(body->mYBodyRot - head->mYHeadRot)) < 100.0f &&
+            std::fabs(wrap180(body->mYBodyRotOld - head->mYHeadRot)) < 100.0f) {
+            g_state.bodyOk = true;
+        }
+        logInfo(std::string("BTP head mode: body component layout ") + (g_state.bodyOk ? "looks OK" : "rejected (head only)"));
+    }
+
+    bool moving = false;
+    float target = g_state.cur;
+    if (g_haveInput.load(std::memory_order_relaxed)) {
+        const float ix = g_inX.load(std::memory_order_relaxed);
+        const float iy = g_inY.load(std::memory_order_relaxed);
+        if (std::isfinite(ix) && std::isfinite(iy) && ix * ix + iy * iy > 0.04f) {
+            // Same formula the game uses for its camera-relative scheme:
+            // heading = camera yaw - atan2(input.x, input.y).
+            target = g_playerYaw.load(std::memory_order_relaxed) - std::atan2(ix, iy) * kRadToDeg;
+            moving = true;
+        }
+    }
+
+    g_state.prev = g_state.cur;
+    if (moving) {
+        const float maxStep = std::clamp(g_turnSpeed.load(std::memory_order_relaxed), 1.0f, 180.0f);
+        g_state.cur += std::clamp(wrap180(target - g_state.cur), -maxStep, maxStep);
+    }
+
+    if (moving && g_dbgBudget.load(std::memory_order_relaxed) > 0) {
+        g_dbgBudget.fetch_sub(1, std::memory_order_relaxed);
+        logInfo("BTP dbg: in=(" + std::to_string(g_inX.load()) + "," + std::to_string(g_inY.load()) +
+                ") camYaw=" + std::to_string(g_playerYaw.load()) + " target=" + std::to_string(target) +
+                " cur=" + std::to_string(g_state.cur) + " head=" + std::to_string(head->mYHeadRot));
+    }
+}
+
+void applyFacing(Actor *player) noexcept {
+    if (!g_state.init || g_state.actor != player) return;
+
+    auto *head = player->tryGetComponent<ActorHeadRotationComponent>();
+    if (head && readable(head, sizeof(*head))) {
+        head->mYHeadRotOld = g_state.prev;
+        head->mYHeadRot = g_state.cur;
+    }
+    if (g_state.bodyOk) {
+        auto *body = player->tryGetComponent<MobBodyRotationComponent>();
+        if (body && readable(body, sizeof(*body))) {
+            body->mYBodyRotOld = g_state.prev;
+            body->mYBodyRot = g_state.cur;
+        }
+    }
+}
+
+void onLocalPlayerTick(Actor *player) noexcept {
+    if (!headModeOn() || !isLocalPlayer(player)) {
+        g_state = FacingState{};
+        return;
+    }
+    stepFacing(player);
+    applyFacing(player);
+}
+
+void onOtherTick(Actor *actor) noexcept {
+    if (!headModeOn() || !isLocalPlayer(actor)) return;
+    applyFacing(actor);
 }
 
 // ---- HUD button (from FreeLook, new icons) -----------------------------------
@@ -171,6 +307,16 @@ void onConfigChanged(std::string_view, std::string_view key, std::string_view va
         return;
     }
 
+    if (key == kSchemeModeKey) {
+        g_schemeMode.store(value == "true" || value == "1" || value == "on" || value == "enabled", std::memory_order_relaxed);
+        logInfo(std::string("BTP mode: ") + (g_schemeMode.load() ? "GAME-SCHEME (experimental)" : "HEAD"));
+        return;
+    }
+    if (key == kTurnSpeedKey) {
+        g_turnSpeed.store(std::clamp(parseOpacity(value, 0.3f) * 100.0f, 5.0f, 90.0f), std::memory_order_relaxed);
+        return;
+    }
+
     if (key == kButtonOpacityKey) {
         const float current = g_buttonOpacity.load(std::memory_order_relaxed);
         g_buttonOpacity.store(parseOpacity(value, current), std::memory_order_relaxed);
@@ -232,6 +378,22 @@ bool registerUi() {
     opacity.dependsOn = kUseCustomButtonKey;
     module.configs.push_back(opacity);
 
+    pl::modmenu::ConfigEntry turn{};
+    turn.key = kTurnSpeedKey;
+    turn.displayName = "Turn speed (degrees per tick)";
+    turn.type = pl::modmenu::ConfigType::SliderInt;
+    turn.defaultValue = "30";
+    turn.minValue = "5";
+    turn.maxValue = "90";
+    module.configs.push_back(turn);
+
+    pl::modmenu::ConfigEntry scheme{};
+    scheme.key = kSchemeModeKey;
+    scheme.displayName = "Experimental: use game camera-relative scheme";
+    scheme.type = pl::modmenu::ConfigType::Toggle;
+    scheme.defaultValue = "false";
+    module.configs.push_back(scheme);
+
     module.onToggle = onModuleToggle;
     module.onConfigChanged = onConfigChanged;
     module.onKeybind = onKeybind;
@@ -270,8 +432,26 @@ LL_STATIC_HOOK(
     "libminecraftpe.so",
     void, void *a0, void *a1, void *a2, void *a3, void *a4, void *a5, void *a6, void *a7
 ) {
+    // Always record the raw movement input and the player's yaw (camera yaw in vanilla)
+    // *before* the game transforms them. HEAD mode uses this to know the real heading.
+    if (a1 && readable(static_cast<char *>(a1) + 0x24, 8)) {
+        float in[2];
+        std::memcpy(in, static_cast<char *>(a1) + 0x24, 8);
+        g_inX.store(in[0], std::memory_order_relaxed);
+        g_inY.store(in[1], std::memory_order_relaxed);
+        g_haveInput.store(true, std::memory_order_relaxed);
+    }
+    if (a3 && readable(static_cast<char *>(a3), 8)) {
+        float rot[2];
+        std::memcpy(rot, static_cast<char *>(a3), 8);
+        g_playerYaw.store(rot[1], std::memory_order_relaxed);
+    }
+    if (!g_seenTransform.exchange(true, std::memory_order_relaxed)) {
+        BetterThirdPerson::getInstance().getSelf().getLogger().info("BTP: input-transform hook is running");
+    }
+
     auto *scheme = static_cast<uint8_t *>(a2);
-    if (!featureOn() || !readable(scheme, 1)) {
+    if (!schemeModeOn() || !readable(scheme, 1)) {
         origin(a0, a1, a2, a3, a4, a5, a6, a7);
         return;
     }
@@ -287,7 +467,7 @@ LL_STATIC_HOOK(
         if (a1 && readable(static_cast<char *>(a1) + 0x24, 8)) std::memcpy(move, static_cast<char *>(a1) + 0x24, 8);
         if (a1 && readable(static_cast<char *>(a1) + 0x54, 12)) std::memcpy(cam, static_cast<char *>(a1) + 0x54, 12);
         BetterThirdPerson::getInstance().getSelf().getLogger().info(
-            "BTP active: original scheme {}, move=({:.2f},{:.2f}) camVec=({:.2f},{:.2f},{:.2f})",
+            "BTP scheme mode: original scheme {}, move=({:.2f},{:.2f}) camVec=({:.2f},{:.2f},{:.2f})",
             static_cast<int>(oldScheme), move[0], move[1], cam[0], cam[1], cam[2]);
     }
 }
@@ -301,7 +481,7 @@ LL_STATIC_HOOK(
     "libminecraftpe.so",
     void, void *cameraComponent, void *a2, void *a3
 ) {
-    if (!featureOn()) origin(cameraComponent, a2, a3);
+    if (!schemeModeOn()) origin(cameraComponent, a2, a3);
 }
 
 // Hook 3 (FreeLook hook D): VanillaCameraAPI slot 7 reports 1 while ON.
@@ -312,8 +492,19 @@ LL_STATIC_HOOK(
     "libminecraftpe.so",
     int, void *a1
 ) {
-    if (!featureOn()) return origin(a1);
+    if (!schemeModeOn()) return origin(a1);
     return 1;
+}
+
+// FreeLook hooks C/E: LocalPlayer tick and Mob tick (HEAD mode writes the head/body yaw here).
+LL_TYPED_HOOK(BtpLocalTick, memory::HookPriority::Normal, Actor, g_addressTick, "libminecraftpe.so", void) {
+    origin();
+    onLocalPlayerTick(static_cast<Actor *>(this));
+}
+
+LL_TYPED_HOOK(BtpMobTick, memory::HookPriority::Normal, Actor, g_addressMob, "libminecraftpe.so", void) {
+    origin();
+    onOtherTick(static_cast<Actor *>(this));
 }
 
 // ClientInstance init-finished: grab the client instance, install hooks, register the UI.
@@ -330,12 +521,15 @@ LL_TYPED_HOOK(
         auto &self = BetterThirdPerson::getInstance().getSelf();
 
         auto unhookAll = [] {
+            BtpMobTick::unhook();
+            BtpLocalTick::unhook();
             BtpCameraFree::unhook();
             BtpCameraSync::unhook();
             BtpScheme::unhook();
         };
 
-        if (BtpScheme::hook() != 0 || BtpCameraSync::hook() != 0 || BtpCameraFree::hook() != 0) {
+        if (BtpScheme::hook() != 0 || BtpCameraSync::hook() != 0 || BtpCameraFree::hook() != 0 ||
+            BtpLocalTick::hook() != 0 || BtpMobTick::hook() != 0) {
             unhookAll();
             g_lifecycleEnabled.store(false, std::memory_order_relaxed);
             self.getLogger().error("Failed to install Better Third Person hooks");
@@ -363,9 +557,17 @@ bool BetterThirdPerson::load() {
     g_lifecycleEnabled.store(true, std::memory_order_relaxed);
     g_moduleEnabled.store(true, std::memory_order_relaxed);
     g_active.store(false, std::memory_order_relaxed);
+    g_state = FacingState{};
 
     // FreeLook hook A signature (same game build).
     g_addressCameraA = resolveSig("FF C3 01 D1 ? ? ? FD ? ? ? A9 ? ? ? F9 ? ? ? A9 ? ? ? A9 FD E3 00 91 54", "libminecraftpe.so");
+    // FreeLook hooks C and E (LocalPlayer tick, Mob tick).
+    g_addressTick = resolveSig(
+        "? ? ? FC ? ? ? A9 ? ? ? A9 ? ? ? A9 ? ? ? A9 ? ? ? A9 ? ? ? A9 ? ? ? 91 ? ? ? D1 54 D0 3B D5 F3 03 00 AA ? ? ? F9 ? ? ? F8 ? ? ? 39",
+        "libminecraftpe.so");
+    g_addressMob = resolveSig(
+        "FF 83 06 D1 ? ? ? FD ? ? ? 6D ? ? ? A9 ? ? ? A9 ? ? ? A9 ? ? ? A9 ? ? ? A9 FD 43 05 91 57 D0 3B D5 F3",
+        "libminecraftpe.so");
     // CameraInputTransformSystem per-entity function (unique in this build).
     g_addressScheme = resolveSig(
         "EB 2B BB 6D E9 23 01 6D FD 7B 02 A9 F6 57 03 A9 F4 4F 04 A9 FD 83 00 91 F4 03 01 AA 81 82 C4 2D 21 08 21 1E 02 08 20 1E",
@@ -375,7 +577,7 @@ bool BetterThirdPerson::load() {
 
 bool BetterThirdPerson::enable() {
     getSelf().getLogger().info("Enabling...");
-    if (g_addressCameraA == 0 || g_addressScheme == 0) {
+    if (g_addressCameraA == 0 || g_addressScheme == 0 || g_addressTick == 0 || g_addressMob == 0) {
         getSelf().getLogger().error("Signatures not found (game version changed?)");
         return false;
     }
@@ -390,6 +592,8 @@ bool BetterThirdPerson::disable() {
     setActive(false);
     unregisterUi();
 
+    BtpMobTick::unhook();
+    BtpLocalTick::unhook();
     BtpCameraFree::unhook();
     BtpCameraSync::unhook();
     BtpScheme::unhook();
@@ -400,6 +604,7 @@ bool BetterThirdPerson::disable() {
 bool BetterThirdPerson::unload() {
     getSelf().getLogger().info("Unloading...");
     g_clientInstance = nullptr;
+    g_state = FacingState{};
     return true;
 }
 

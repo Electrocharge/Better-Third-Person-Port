@@ -12,15 +12,22 @@ with the Java "Better Third Person" mod or its authors (no code from that mod wa
 described behavior). Do not sell it.
 
 ## How it works (this game build)
-Bedrock already contains a "camera relative" control scheme in `CameraInputTransformSystem`: it converts input
-to camera-relative movement and rotates the player toward the movement direction. While the button is ON:
-1. the per-entity input-transform function is hooked and the control scheme byte is forced to `1` (camera relative)
-   for that call, then restored;
-2. FreeLook's camera hooks stop the camera from dragging the player's rotation and keep the camera free.
+Two modes (Mod Menu toggle "Experimental: use game camera-relative scheme"):
+
+- **HEAD mode (default)** - built on FreeLook's tick hooks (the same place FreeLook locks the head yaw).
+  Camera, movement and aiming stay vanilla. Each tick the mod reads the raw movement input (captured from the
+  game's input-transform function) and computes the real heading as `camera yaw - atan2(input.x, input.y)`
+  (the formula the game itself uses for its camera-relative scheme), then smoothly steers the head and body yaw
+  toward it. Body yaw uses an assumed layout that is sanity-checked at runtime (head only if rejected).
+- **GAME-SCHEME mode (experimental)** - forces the game's "camera relative" control scheme (value 1) for the
+  input-transform step and uses FreeLook's camera hooks (skip camera->player rotation sync, camera free).
+
+The launch log prints `BTP:` lines (hook running, button state, first few heading values) so problems can be
+diagnosed from a screenshot.
 
 ## Known limits
-- Aiming/attacking uses the player's rotation, which now follows movement, so it does not follow the crosshair
-  like the Java mod does while interacting (not implemented).
+- HEAD mode only changes how the model faces; scheme mode also turns the real player rotation, so aiming then
+  follows movement instead of the crosshair (the Java mod fixes this while interacting; not implemented).
 - No automatic first/third person detection: turn it off with the button in first person.
 - Signatures match the same Minecraft build as FreeLook's. After a game update they need redoing.
 - Mod Menu: on-screen button on/off, keybind (when the button is off), button opacity.

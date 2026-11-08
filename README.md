@@ -11,21 +11,18 @@ FreeLook. This is an **unofficial derivative work**, not an official version of 
 with the Java "Better Third Person" mod or its authors (no code from that mod was used, only its publicly
 described behavior). Do not sell it.
 
-## Modes (Mod Menu slider "Mode")
-The on-screen button toggles whichever mode is selected. It starts on **mode 0**, which is FreeLook's own logic
-ported 1:1, so the button behaves exactly like FreeLook's. Use it first to confirm the hooks work, then try 1 and 2.
+## How the button works
+The on-screen button is FreeLook's button: while ON it uses FreeLook's four hooks (skip the camera->player rotation
+sync, keep the camera free, lock the head yaw), so it behaves exactly like FreeLook.
 
-- **0 - FreeLook (original):** skips the camera->player rotation sync, keeps the camera free, locks the head yaw
-  (FreeLook hooks A, D, C, E).
-- **1 - Better Third Person (game scheme):** same camera hooks as FreeLook (A, D), no head lock; also forces the
-  game's own "camera relative" control scheme for the input-transform step so movement follows the camera and the
-  character turns toward the movement direction.
-- **2 - BTP head-only:** camera, movement and aiming stay vanilla; the head/body yaw is steered toward the real
-  heading (`camera yaw - atan2(input.x, input.y)`, the game's own formula) from FreeLook's tick hooks.
+Mod Menu toggle **"Better Third Person movement (experimental)"** (off by default): while the button is ON, the
+game's own "camera relative" control scheme is forced for the input-transform step, so movement follows the camera
+and the character turns toward the movement direction (the head lock is released so it can turn). This extra hook is
+optional: if it cannot be installed on your game version, the FreeLook part still works.
 
 ## Known limits
-- HEAD mode only changes how the model faces; scheme mode also turns the real player rotation, so aiming then
-  follows movement instead of the crosshair (the Java mod fixes this while interacting; not implemented).
+- With movement mode on, the real player rotation follows movement, so aiming follows movement instead of the
+  crosshair (the Java mod fixes this while interacting; not implemented).
 - No automatic first/third person detection: turn it off with the button in first person.
 - Signatures match the same Minecraft build as FreeLook's. After a game update they need redoing.
 - Mod Menu: on-screen button on/off, keybind (when the button is off), button opacity.

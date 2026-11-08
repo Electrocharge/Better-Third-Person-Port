@@ -2,13 +2,13 @@
 
 #include <pl/Mod.hpp>
 
-namespace btp {
+namespace nexcaise {
 
-class BetterThirdPerson {
+class FreeLook {
   public:
-    static BetterThirdPerson &getInstance();
+    static FreeLook &getInstance();
 
-    BetterThirdPerson();
+    FreeLook();
 
     [[nodiscard]] ll::mod::NativeMod &getSelf() const { return mSelf; }
 
@@ -21,4 +21,4 @@ class BetterThirdPerson {
     ll::mod::NativeMod &mSelf;
 };
 
-} // namespace btp
+} // namespace nexcaise

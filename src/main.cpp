@@ -1,4 +1,4 @@
-#include "mod/BetterThirdPerson.h"
+#include "mod/FreeLook.h"
 #include <pl/Mod.hpp>
 
-PL_REGISTER_MOD(btp::BetterThirdPerson, btp::BetterThirdPerson::getInstance());
+PL_REGISTER_MOD(nexcaise::FreeLook, nexcaise::FreeLook::getInstance());
